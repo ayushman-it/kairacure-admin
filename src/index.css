@@ -1,8 +1,9 @@
-﻿/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════
    BRAND COLOR TOKENS  —  Kaira Cure
    Dark  : #0d2f5d   Light : #dbeafe
    ═══════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Anonymous+Pro:ital,wght@0,400;0,700;1,400&display=swap');
+@import 'bootstrap-icons/font/bootstrap-icons.css';
 
 :root {
   --brand-dark:   #0d2f5d;
@@ -7213,86 +7214,134 @@ main {
   }
 }
 
+/* ── Kairacure Enterprise Workspace Redesign ── */
 .admin-login-page {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 24px;
-  background:
-    linear-gradient(135deg, rgba(0, 156, 155, 0.12), rgba(5, 31, 52, 0.06)),
-    #f5f8fb;
+  background: radial-gradient(circle at 50% 0%, #0f2942 0%, #071321 100%);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+.admin-login-shell {
+  width: min(100%, 460px);
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  background: #ffffff;
 }
 
 .admin-login-card {
-  width: min(100%, 430px);
-  border: 1px solid #d8e2eb;
-  border-radius: 8px;
-  padding: 28px;
-  display: grid;
+  width: 100%;
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
   background: #ffffff;
-  box-shadow: 0 20px 54px rgba(15, 35, 65, 0.12);
-}
-
-.admin-login-mark {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  color: #ffffff;
-  background: #008f8d;
-}
-
-.admin-login-mark .admin-svg-icon {
-  width: 30px;
-  height: 30px;
 }
 
 .admin-login-card h1 {
   margin: 0;
-  color: #063f3d;
-  font-size: 1.8rem;
+  color: #0f172a;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
 }
 
 .admin-login-card p {
   margin: 0;
-  color: #60758d;
-  line-height: 1.55;
+  color: #64748b;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.admin-login-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 4px 10px;
+  border-radius: 20px;
+  width: fit-content;
 }
 
 .admin-login-card label {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
-  color: #344962;
+  color: #334155;
   font-size: 0.82rem;
   font-weight: 700;
 }
 
-.admin-login-card input {
-  min-height: 44px;
-  border: 1px solid #d8e2eb;
-  border-radius: 6px;
-  padding: 0 12px;
-  outline: 0;
+.admin-login-card input[type="email"],
+.admin-login-card input[type="password"],
+.admin-login-card input[type="text"] {
+  width: 100%;
+  height: 46px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-size: 0.95rem;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.15s ease;
+  background: #f8fafc;
 }
 
-.admin-login-card > span {
-  border-radius: 6px;
-  padding: 10px 12px;
-  color: #a82929;
-  background: #fff1f1;
-  font-size: 0.82rem;
-  font-weight: 700;
+.admin-login-card input:focus {
+  border-color: #0284c7;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
 }
 
-.admin-login-card button {
-  min-height: 46px;
-  border: 0;
-  border-radius: 6px;
+.admin-login-card button[type="submit"] {
+  height: 48px;
+  border: none;
+  border-radius: 8px;
   color: #ffffff;
-  background: #008f8d;
-  font-weight: 800;
+  background: linear-gradient(135deg, #0d2f5d 0%, #0f172a 100%);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(13, 47, 93, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-login-card button[type="submit"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(13, 47, 93, 0.35);
+  background: linear-gradient(135deg, #1e3a8a 0%, #0d2f5d 100%);
+}
+
+.admin-login-card button[type="submit"]:disabled {
+  transform: none;
+  opacity: 0.7;
+}
+
+.admin-login-error {
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .patient-login-page {
