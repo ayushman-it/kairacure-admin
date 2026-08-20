@@ -1,0 +1,68 @@
+name: Deploy Admin
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-admin
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-south-1
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+        run: npm run build
+
+      - name: Verify build
+        run: |
+          if [ ! -f dist/index.html ]; then
+            echo "FAIL: dist/index.html not found"
+            exit 1
+          fi
+          BUNDLE=$(ls dist/assets/index-*.js 2>/dev/null | head -1)
+          echo "Bundle: $BUNDLE"
+          grep -c "kairacure-api-alb" "$BUNDLE" > /dev/null 2>&1 && echo "API URL baked in: OK" || echo "WARNING: API URL not found in bundle"
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync dist/ s3://kairacure-admin-prod/ \
+            --region ${{ env.AWS_REGION }} \
+            --delete \
+            --cache-control "public,max-age=300"
+          aws s3 cp s3://kairacure-admin-prod/index.html s3://kairacure-admin-prod/index.html \
+            --region ${{ env.AWS_REGION }} \
+            --cache-control "no-cache"
+          echo "Deployed to s3://kairacure-admin-prod/"
+
+      - name: Verify deployment
+        run: |
+          sleep 5
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://kairacure-admin-prod.s3-website.ap-south-1.amazonaws.com/)
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "Verification PASSED (HTTP $HTTP_CODE)"
+          else
+            echo "WARNING: Homepage returned HTTP $HTTP_CODE"
+          fi
