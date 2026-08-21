@@ -66,3 +66,18 @@ jobs:
           else
             echo "WARNING: Homepage returned HTTP $HTTP_CODE"
           fi
+
+      - name: Invalidate CloudFront cache
+        if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        continue-on-error: true
+        run: |
+          DIST_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
+          if [ -n "$DIST_ID" ] && [ "$DIST_ID" != "" ]; then
+            aws cloudfront create-invalidation \
+              --distribution-id "$DIST_ID" \
+              --paths "/index.html" "/*" \
+              --region us-east-1
+            echo "CloudFront invalidation sent for $DIST_ID"
+          else
+            echo "No CloudFront distribution ID configured (skipped)"
+          fi
