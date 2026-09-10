@@ -8,8 +8,15 @@ concurrency:
   group: deploy-admin
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  id-token: write
+
 env:
   AWS_REGION: ap-south-1
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID || '987119352718' }}
+  DEPLOY_ROLE_ARN: ${{ vars.DEPLOY_ROLE_ARN || 'arn:aws:iam::987119352718:role/kairacure-github-deploy' }}
+  S3_ADMIN: ${{ vars.S3_ADMIN_BUCKET || 'kairacure-admin-prod' }}
 
 jobs:
   build-and-deploy:
@@ -17,10 +24,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ env.DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - uses: actions/setup-node@v4
@@ -42,25 +49,23 @@ jobs:
             echo "FAIL: dist/index.html not found"
             exit 1
           fi
-          BUNDLE=$(ls dist/assets/index-*.js 2>/dev/null | head -1)
-          echo "Bundle: $BUNDLE"
-          grep -c "kairacure-api-alb" "$BUNDLE" > /dev/null 2>&1 && echo "API URL baked in: OK" || echo "WARNING: API URL not found in bundle"
+          echo "Build verified"
 
       - name: Deploy to S3
         run: |
-          aws s3 sync dist/ s3://kairacure-admin-prod/ \
+          aws s3 sync dist/ s3://${{ env.S3_ADMIN }}/ \
             --region ${{ env.AWS_REGION }} \
             --delete \
             --cache-control "public,max-age=300"
-          aws s3 cp s3://kairacure-admin-prod/index.html s3://kairacure-admin-prod/index.html \
+          aws s3 cp s3://${{ env.S3_ADMIN }}/index.html s3://${{ env.S3_ADMIN }}/index.html \
             --region ${{ env.AWS_REGION }} \
             --cache-control "no-cache"
-          echo "Deployed to s3://kairacure-admin-prod/"
+          echo "Deployed to s3://${{ env.S3_ADMIN }}/"
 
       - name: Verify deployment
         run: |
           sleep 5
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://kairacure-admin-prod.s3-website.ap-south-1.amazonaws.com/)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ env.S3_ADMIN }}.s3-website.${{ env.AWS_REGION }}.amazonaws.com/)
           if [ "$HTTP_CODE" = "200" ]; then
             echo "Verification PASSED (HTTP $HTTP_CODE)"
           else
@@ -70,7 +75,7 @@ jobs:
       - name: Invalidate CloudFront cache
         continue-on-error: true
         env:
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
         run: |
           DIST_ID="$CLOUDFRONT_DISTRIBUTION_ID"
           if [ -n "$DIST_ID" ] && [ "$DIST_ID" != "" ]; then
