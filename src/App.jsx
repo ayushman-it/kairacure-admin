@@ -95,7 +95,7 @@ const WHY_US = [
 const TRUST_METRICS = [
   ['100k+', 'patient journeys benchmarked'],
   ['38+', 'destination countries tracked'],
-  ['1,500+', 'hospital partners mapped'],
+  ['1,500+', 'accredited hospitals mapped'],
   ['48h', 'medical opinion target'],
 ];
 
@@ -895,7 +895,7 @@ function Hero({ onFindCare, onSelectSearchOption, query, searchOptions, setQuery
         <p>Compare verified hospitals, get specialist doctors, estimate costs in INR, and plan your complete travel — all in one place, at no extra cost.</p>
         <div className="hero-stats">
           <span><strong>1,00,000+</strong>Patients served</span>
-          <span><strong>1,500+</strong>Hospital partners</span>
+          <span><strong>1,500+</strong>Accredited hospitals</span>
           <span><strong>4.8 ★</strong>Average rating</span>
         </div>
         <div className="hero-action-row">
